@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .monitoring-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .monitoring-indicator .dot {
+            width: 10px;
+            height: 10px;
+            background-color: #28a745;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .email-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+        .email-card:hover {
+            transform: translateY(-5px);
+        }
+        .email-card h5 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .email-card h6 {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        .email-card .status {
+            font-size: 0.9rem;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>📧 Email Auto-Reply System</h1>
+    </div>
+
+    <!-- Monitoring Indicator -->
+    <div class="monitoring-indicator">
+        <div class="dot"></div>
+        <span>Monitoring for new emails...</span>
+    </div>
+
+    <!-- Email List -->
+    <div class="container">
+        <div id="email-list" class="row">
+            <!-- New emails will be displayed here -->
+            <div class="col-12 text-center" id="no-emails">
+                <p>No new emails found. The system is actively monitoring your inbox.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2023 Email Auto-Reply System. All rights reserved.</p>
+    </div>
+
+    <!-- Bootstrap JS & SocketIO -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+
+    <script>
+        const socket = io();
+
+        // Listen for new emails
+        socket.on("new_email", (email) => {
+            const emailList = document.getElementById("email-list");
+            const noEmails = document.getElementById("no-emails");
+
+            // Hide the "No emails" message if it's visible
+            if (noEmails) noEmails.style.display = "none";
+
+            // Create a new email card
+            const emailItem = document.createElement("div");
+            emailItem.className = "col-md-6 email-item";
+            emailItem.id = `email-${email.id}`;
+            emailItem.innerHTML = `
+                <div class="email-card">
+                    <h5>${email.from}</h5>
+                    <h6>${email.subject}</h6>
+                    <p>${email.body}</p>
+                    <button class="btn btn-primary" onclick="sendReply('${email.id}')">Send Reply</button>
+                    <p class="status">⏳ Waiting for reply...</p>
+                </div>
+            `;
+            emailList.appendChild(emailItem);
+        });
+
+        // Remove email from UI after reply
+        socket.on("remove_email", (emailId) => {
+            const emailElement = document.getElementById(`email-${emailId}`);
+            if (emailElement) emailElement.remove();
+
+            // Show the "No emails" message if no emails are left
+            const emailList = document.getElementById("email-list");
+            if (emailList.children.length === 1) { // Only the "no-emails" message is left
+                const noEmails = document.getElementById("no-emails");
+                if (noEmails) noEmails.style.display = "block";
+            }
+        });
+
+        // Function to send reply
+        function sendReply(emailId) {
+            const emailElement = document.getElementById(`email-${emailId}`);
+            if (emailElement) {
+                const emailData = {
+                    id: emailId,
+                    from: emailElement.querySelector("h5").innerText,
+                    subject: emailElement.querySelector("h6").innerText,
+                    body: emailElement.querySelector("p").innerText
+                };
+                socket.emit("send_reply", emailData);
+            }
+        }
+    </script>
+</body>
+</html>
