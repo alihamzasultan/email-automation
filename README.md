@@ -1,5 +1,8 @@
 ### CODE IS UPDATED TO THIS REPOSITORY: https://github.com/alihamzasultan/email-automation-dashboard.git
 
+# Live Dashboard
+https://email-automation-dashboard-3aia.vercel.app/
+
 # Image generation chatbot:
 https://tinyurl.com/ai-image-bot
 
