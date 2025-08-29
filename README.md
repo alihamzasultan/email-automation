@@ -1,4 +1,5 @@
-### CODE IS UPDATED TO THIS REPOSITORY: https://github.com/alihamzasultan/email-automation-dashboard.git
+## CODE IS UPDATED TO THIS REPOSITORY:
+https://github.com/alihamzasultan/email-automation-dashboard.git
 
 # Live Dashboard
 https://email-automation-dashboard-3aia.vercel.app/
